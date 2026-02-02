@@ -36,12 +36,13 @@ class MoneySpitterGUI:
         self.root.minsize(600, 500)
         
         # Grid configuration for responsiveness
-        self.root.grid_columnconfigure(0, weight=1)
-        self.root.grid_rowconfigure(1, weight=1) # Results expand
+        self.root.grid_columnconfigure(0, weight=1) # Input Column
+        self.root.grid_columnconfigure(1, weight=1) # Results Column
+        self.root.grid_rowconfigure(0, weight=1)    # Both fill height
         
-        # --- Context 1: Header & Input Section ---
+        # --- Context 1: Header & Input Section (Left Column) ---
         self.main_frame = ctk.CTkFrame(self.root, corner_radius=15, fg_color="transparent")
-        self.main_frame.grid(row=0, column=0, padx=20, pady=20, sticky="ew")
+        self.main_frame.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
         self.main_frame.grid_columnconfigure(0, weight=1)
 
         # Title
@@ -76,6 +77,7 @@ class MoneySpitterGUI:
             font=ctk.CTkFont(size=16)
         )
         self.amount_entry.grid(row=1, column=0, padx=20, pady=(0, 5), sticky="ew")
+        self.amount_entry.bind('<KeyRelease>', self.format_currency_input)
         self.amount_entry.bind('<Return>', lambda event: self.on_split_button_click())
         
         # Parts Selection
@@ -102,9 +104,9 @@ class MoneySpitterGUI:
         )
         self.split_button.grid(row=3, column=0, pady=20, padx=10, sticky="ew")
 
-        # --- Context 2: Results Section ---
-        self.results_container = ctk.CTkFrame(self.root, corner_radius=15) # Container with background
-        self.results_container.grid(row=1, column=0, padx=20, pady=(0, 20), sticky="nsew")
+        # --- Context 2: Results Section (Right Column) ---
+        self.results_container = ctk.CTkFrame(self.root, corner_radius=15, fg_color=("gray95", "gray10")) 
+        self.results_container.grid(row=0, column=1, padx=20, pady=20, sticky="nsew")
         self.results_container.grid_columnconfigure(0, weight=1)
         self.results_container.grid_rowconfigure(1, weight=1)
         
@@ -139,6 +141,30 @@ class MoneySpitterGUI:
             font=ctk.CTkFont(size=12)
         )
         self.status_label.pack(side="left")
+
+    def format_currency_input(self, event=None):
+        """Format input otomatis dengan pemisah ribuan"""
+        value = self.amount_entry.get()
+        
+        # Hapus semua karakter non-digit
+        clean_value = ''.join(filter(str.isdigit, value))
+        
+        if not clean_value:
+            # Jika user menghapus semua atau input sampah, bersihkan
+            if value:
+                self.amount_entry.delete(0, "end")
+            return
+
+        # Format ribuan dengan titik
+        try:
+            formatted = "{:,}".format(int(clean_value)).replace(",", ".")
+            
+            # Update hanya jika berbeda (mencegah loop/cursor jump yang tidak perlu)
+            if value != formatted:
+                self.amount_entry.delete(0, "end")
+                self.amount_entry.insert(0, formatted)
+        except ValueError:
+            pass
 
     def on_split_button_click(self):
         """Handle split button click event"""
