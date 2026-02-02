@@ -1,0 +1,16 @@
+# Core dependencies
+# tkinter is built-in with Python, no need to install
+
+# Testing dependencies
+pytest>=7.0.0
+hypothesis>=6.0.0
+
+# Development dependencies (optional)
+pytest-cov>=4.0.0
+black>=22.0.0
+flake8>=5.0.0
+
+# GUI Dependencies
+customtkinter>=5.2.0
+packaging
+pillow
